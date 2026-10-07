@@ -1,7 +1,7 @@
 // Service worker: permite abrir la app sin conexión.
 // Primero intenta la red (así siempre ves la última versión) y, si no hay
 // internet, usa la copia guardada.
-var CACHE = 'easynotes-v2';
+var CACHE = 'easynotes-v3';
 var ASSETS = [
   './',
   'index.html',
@@ -47,5 +47,18 @@ self.addEventListener('fetch', function (event) {
       .catch(function () {
         return caches.match(req).then(function (hit) { return hit || caches.match('index.html'); });
       })
+  );
+});
+
+// Al tocar una notificación de alarma, abre (o trae al frente) la app.
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) return list[i].focus();
+      }
+      return self.clients.openWindow('./');
+    })
   );
 });

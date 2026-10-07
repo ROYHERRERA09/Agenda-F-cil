@@ -14,6 +14,22 @@ No necesitas instalar nada: son archivos HTML, CSS y JavaScript que GitHub Pages
 
 En el celular verás dos pestañas abajo (Semana y Día). En un computador o tableta se ve la semana a la izquierda y el panel del día a la derecha.
 
+## Alarmas y avisos
+
+Al crear o editar un evento eliges el **Aviso**: sin aviso, al empezar, o 5, 10, 15, 30 minutos o 1 hora antes. Los eventos nuevos traen 10 minutos por defecto. Los eventos que ya tenías quedan sin aviso hasta que los edites.
+
+**Dentro de la app** la alarma muestra una ventana con el nombre del evento, suena, vibra (en el celular) y tiene dos botones: **Posponer 5 min** y **Descartar**. Si la app está en segundo plano, además sale una notificación del sistema, y al tocarla se abre la app. La primera vez que guardes un evento con aviso, el navegador te pedirá permiso para mostrar notificaciones: acéptalo.
+
+Usa **Probar alarma** en el formulario del evento para oír y ver cómo suena, y para dar el permiso de notificaciones sin esperar.
+
+**Importante:** una página web no puede hacer sonar una alarma si la app está cerrada del todo, porque eso requiere un servidor de pago. Por eso cada evento tiene el botón **Agregar al calendario**: descarga un archivo `.ics` que, al abrirlo, mete el evento en el calendario del teléfono (Google Calendar, Samsung, Apple...) con el mismo aviso. Ese calendario sí suena con la app cerrada. Toca el archivo descargado y elige tu app de calendario.
+
+Detalles:
+- Cada dispositivo suena por su cuenta. Si tienes la app abierta en el celular y en el computador, sonará en los dos.
+- En el iPhone, las notificaciones solo funcionan si instalaste la app en la pantalla de inicio (iOS 16.4 o más reciente). Para alarmas con la app cerrada, usa el calendario.
+- Si el navegador bloqueó las notificaciones, el aviso se verá y sonará solo dentro de la app. Para volver a permitirlas, toca el candado junto a la dirección de la página → Permisos.
+- Una alarma que se pasó mientras la app estaba cerrada no suena después: solo suenan las que tocan en ese momento o hasta 5 minutos tarde.
+
 ## 1. Publicarla con GitHub Pages
 
 1. En tu repositorio `easynotes-planner` entra a **Settings → Pages**.

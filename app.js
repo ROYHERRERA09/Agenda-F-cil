@@ -18,6 +18,9 @@
   var HOUR = 56;      // alto de una hora en píxeles (igual que --hour en el CSS)
   var GUTTER = 54;    // ancho de la columna de horas (igual que --gutter)
   var FIREBASE_VERSION = '10.12.2';
+  var ALARM_KEY = 'easynotes.alarms'; // alarmas ya mostradas o pospuestas (por dispositivo)
+  var GRACE_MS = 5 * 60000;          // una alarma atrasada se muestra hasta 5 min después del inicio
+  var SNOOZE_MIN = 5;                // minutos que se pospone una alarma
 
   // ── Utilidades ─────────────────────────────────────────────────────
   function $(id) { return document.getElementById(id); }
@@ -144,6 +147,7 @@
           saveLocal();
           cloud.status = 'Sincronizado';
           renderAll();
+          checkAlarms();
         } catch (e) {
           cloud.status = 'Datos de la nube ilegibles';
         }
@@ -345,6 +349,22 @@
     });
   }
 
+  function setRemind(v) {
+    var sel = $('evRemind');
+    sel.value = String(v);
+    if (sel.value !== String(v)) sel.value = '-1';
+  }
+
+  function updateRemindHint() {
+    var t = 'La alarma suena mientras la app esté abierta. Para que suene con la app cerrada, usa «Agregar al calendario».';
+    try {
+      if ('Notification' in window && Notification.permission === 'denied') {
+        t += ' Las notificaciones están bloqueadas en este navegador, así que el aviso solo se verá dentro de la app.';
+      }
+    } catch (e) { /* sin notificaciones */ }
+    $('remindHint').textContent = t;
+  }
+
   function openEvent(ev, dayKey, startMin) {
     editingId = ev ? ev.id : null;
     $('evHeading').textContent = ev ? 'Editar evento' : 'Nuevo evento';
@@ -353,26 +373,260 @@
     $('evStart').value = fmtMin(ev ? ev.startMin : startMin);
     $('evEnd').value = fmtMin(ev ? ev.endMin : Math.min(startMin + 60, 1439));
     setColor(ev ? ev.colorIndex : 0);
+    setRemind(ev ? (typeof ev.remind === 'number' ? ev.remind : -1) : 10);
+    updateRemindHint();
     $('evDelete').hidden = !ev;
     $('eventDlg').showModal();
     if (!ev && !isPhone()) $('evTitle').focus();
   }
 
-  function submitEvent(e) {
-    e.preventDefault();
+  /** Lee el formulario y devuelve el evento (corrigiendo horas imposibles). */
+  function formEvent() {
     var start = toMin($('evStart').value || '09:00');
     var end = toMin($('evEnd').value || '10:00');
     if (end <= start) {
       end = start + 60;
       if (end > 1439) { end = 1439; start = Math.min(start, 1438); }
     }
-    var date = $('evDate').value || dateKey(selected);
-    var title = $('evTitle').value.trim() || 'Sin título';
-    saveEvent({ id: editingId || newId(), title: title, date: date, startMin: start, endMin: end, colorIndex: curColor });
+    var r = parseInt($('evRemind').value, 10);
+    return {
+      id: editingId || newId(),
+      title: $('evTitle').value.trim() || 'Sin título',
+      date: $('evDate').value || dateKey(selected),
+      startMin: start,
+      endMin: end,
+      colorIndex: curColor,
+      remind: isNaN(r) ? -1 : r
+    };
+  }
+
+  function submitEvent(e) {
+    e.preventDefault();
+    var ev = formEvent();
+    saveEvent(ev);
+    if (ev.remind >= 0) { unlockAudio(); ensureNotifPermission(); }
     $('eventDlg').close();
-    selected = parseKey(date);
+    selected = parseKey(ev.date);
     weekStart = startOfWeek(selected);
     renderAll();
+    checkAlarms();
+  }
+
+  // ── Alarmas ────────────────────────────────────────────────────────
+  var alarms = {};          // clave -> { done: true } | { until: ms }
+  var alarmQueue = [];
+  var currentAlarm = null;
+  var audioCtx = null;
+  var soundTimer = null;
+  var soundStop = null;
+
+  function loadAlarms() {
+    try { alarms = JSON.parse(localStorage.getItem(ALARM_KEY)) || {}; } catch (e) { alarms = {}; }
+    // Limpia las de hace más de 3 días
+    var limit = dateKey(addDays(new Date(), -3));
+    Object.keys(alarms).forEach(function (k) {
+      var d = k.split('|')[1];
+      if (!d || d < limit) delete alarms[k];
+    });
+  }
+
+  function saveAlarms() {
+    try { localStorage.setItem(ALARM_KEY, JSON.stringify(alarms)); } catch (e) { /* sin acceso */ }
+  }
+
+  function alarmKey(e) { return e.id + '|' + e.date + '|' + e.startMin + '|' + e.remind; }
+
+  function eventTs(e, min) {
+    var d = parseKey(e.date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, min).getTime();
+  }
+
+  function describeWhen(e) {
+    var m = Math.round((eventTs(e, e.startMin) - Date.now()) / 60000);
+    var rel = m > 0 ? 'Empieza en ' + m + ' min' : (m === 0 ? 'Empieza ahora' : 'Empezó hace ' + (-m) + ' min');
+    return fmtMin(e.startMin) + ' – ' + fmtMin(e.endMin) + ' · ' + rel;
+  }
+
+  function enqueueAlarm(a) { alarmQueue.push(a); }
+
+  /** Revisa los eventos y dispara las alarmas que ya toca mostrar. */
+  function checkAlarms() {
+    var now = Date.now();
+    var touched = false;
+    state.events.forEach(function (e) {
+      var r = typeof e.remind === 'number' ? e.remind : -1;
+      if (r < 0) return;
+      var key = alarmKey(e);
+      var st = alarms[key];
+      var start = eventTs(e, e.startMin);
+      var due = false;
+      if (!st) due = now >= start - r * 60000 && now <= start + GRACE_MS;
+      else if (st.until) due = now >= st.until && now < eventTs(e, e.endMin);
+      if (!due) return;
+      alarms[key] = { done: true };
+      touched = true;
+      enqueueAlarm({ key: key, title: e.title, ev: e });
+    });
+    if (touched) saveAlarms();
+    showNextAlarm();
+  }
+
+  function showNextAlarm() {
+    if (currentAlarm || !alarmQueue.length) return;
+    currentAlarm = alarmQueue.shift();
+    var a = currentAlarm;
+    var when = a.when || describeWhen(a.ev);
+    $('alarmTitle').textContent = a.title;
+    $('alarmWhen').textContent = when;
+    $('alarmSnooze').hidden = !!a.test;
+    startSound();
+    var away = document.hidden || (document.hasFocus && !document.hasFocus());
+    if (a.test || away) showSystemNotification(a.title, when, a.key);
+    if (!$('alarmDlg').open) $('alarmDlg').showModal();
+  }
+
+  function closeAlarm(snooze) {
+    var a = currentAlarm;
+    if (!a) return;
+    currentAlarm = null;
+    stopSound();
+    if (snooze && !a.test) {
+      alarms[a.key] = { until: Date.now() + SNOOZE_MIN * 60000 };
+      saveAlarms();
+    }
+    var dlg = $('alarmDlg');
+    if (dlg.open) dlg.close();
+    showNextAlarm();
+  }
+
+  // Sonido y vibración (el navegador exige un toque previo del usuario para permitir audio)
+  function unlockAudio() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* sin audio */ }
+  }
+
+  function beepAt(t0, freq) {
+    var o = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.4, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start(t0);
+    o.stop(t0 + 0.25);
+  }
+
+  function ringTick() {
+    try {
+      if (audioCtx && audioCtx.state === 'running') {
+        var t = audioCtx.currentTime + 0.05;
+        for (var i = 0; i < 3; i++) beepAt(t + i * 0.32, 988);
+      }
+    } catch (e) { /* sin audio */ }
+    try { if (navigator.vibrate) navigator.vibrate([300, 150, 300]); } catch (e) { /* sin vibración */ }
+  }
+
+  function startSound() {
+    stopSound();
+    unlockAudio();
+    ringTick();
+    soundTimer = setInterval(ringTick, 1500);
+    soundStop = setTimeout(stopSound, 60000); // se calla sola al minuto
+  }
+
+  function stopSound() {
+    clearInterval(soundTimer);
+    clearTimeout(soundStop);
+    soundTimer = null;
+    soundStop = null;
+    try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) { /* sin vibración */ }
+  }
+
+  // Notificación del sistema (útil cuando la app está en segundo plano)
+  function ensureNotifPermission() {
+    try {
+      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    } catch (e) { /* sin notificaciones */ }
+  }
+
+  function showSystemNotification(title, body, tag) {
+    try {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      var opts = {
+        body: body,
+        tag: tag,
+        icon: 'icons/icon-192.png',
+        badge: 'icons/icon-192.png',
+        requireInteraction: true,
+        vibrate: [300, 150, 300, 150, 300]
+      };
+      var fallback = function () { try { new Notification(title, opts); } catch (e) { /* sin notificaciones */ } };
+      if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration) {
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          if (reg && reg.showNotification) reg.showNotification(title, opts); else fallback();
+        }).catch(fallback);
+      } else {
+        fallback();
+      }
+    } catch (e) { /* sin notificaciones */ }
+  }
+
+  // ── Exportar a calendario (.ics) ───────────────────────────────────
+  function icsEscape(s) {
+    return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  }
+
+  function icsLocal(dateStr, min) {
+    var p = dateStr.split('-');
+    return p[0] + p[1] + p[2] + 'T' + pad(Math.floor(min / 60)) + pad(min % 60) + '00';
+  }
+
+  function utcStamp() {
+    var d = new Date();
+    return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
+      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+  }
+
+  function buildIcs(ev) {
+    var lines = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//EasyNotes Planner//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      'UID:' + ev.id + '@easynotes-planner',
+      'DTSTAMP:' + utcStamp(),
+      'DTSTART:' + icsLocal(ev.date, ev.startMin),
+      'DTEND:' + icsLocal(ev.date, ev.endMin),
+      'SUMMARY:' + icsEscape(ev.title)
+    ];
+    if (ev.remind >= 0) {
+      lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEscape(ev.title),
+        'TRIGGER:' + (ev.remind === 0 ? 'PT0S' : '-PT' + ev.remind + 'M'), 'END:VALARM');
+    }
+    lines.push('END:VEVENT', 'END:VCALENDAR');
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function slug(s) {
+    return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'evento';
+  }
+
+  function downloadIcs(ev) {
+    var blob = new Blob([buildIcs(ev)], { type: 'text/calendar;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = slug(ev.title) + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
 
   // ── Diálogo de sincronización ──────────────────────────────────────
@@ -480,6 +734,21 @@
 
     $('evForm').addEventListener('submit', submitEvent);
     $('evCancel').addEventListener('click', function () { $('eventDlg').close(); });
+    $('evTest').addEventListener('click', function () {
+      unlockAudio();
+      ensureNotifPermission();
+      enqueueAlarm({ key: 'test|' + Date.now(), title: $('evTitle').value.trim() || 'Alarma de prueba', when: 'Así sonará tu aviso', test: true });
+      showNextAlarm();
+    });
+    $('evIcs').addEventListener('click', function () { downloadIcs(formEvent()); });
+    $('alarmSnooze').addEventListener('click', function () { closeAlarm(true); });
+    $('alarmDismiss').addEventListener('click', function () { closeAlarm(false); });
+    $('alarmDlg').addEventListener('close', function () { if (!$('alarmDlg').open) closeAlarm(false); });
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (n) {
+      document.addEventListener(n, unlockAudio, { passive: true });
+    });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) checkAlarms(); });
+    window.addEventListener('focus', checkAlarms);
     $('evDelete').addEventListener('click', function () {
       if (editingId) deleteEvent(editingId);
       $('eventDlg').close();
@@ -563,6 +832,9 @@
   scrollToSelectedDay();
   lastScroll = { top: $('weekScroll').scrollTop, left: $('weekScroll').scrollLeft };
   initCloud();
+  loadAlarms();
+  checkAlarms();
+  setInterval(checkAlarms, 10000);
 
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', function () {

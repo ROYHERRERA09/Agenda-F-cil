@@ -72,6 +72,22 @@
       <div class="field">Color
         <div class="swatches" id="swatches"></div>
       </div>
+      <label class="field">Aviso (alarma)
+        <select id="evRemind">
+          <option value="-1">Sin aviso</option>
+          <option value="0">Al empezar</option>
+          <option value="5">5 minutos antes</option>
+          <option value="10">10 minutos antes</option>
+          <option value="15">15 minutos antes</option>
+          <option value="30">30 minutos antes</option>
+          <option value="60">1 hora antes</option>
+        </select>
+      </label>
+      <p class="hint small" id="remindHint"></p>
+      <div class="inline-actions">
+        <button class="btn" id="evTest" type="button">Probar alarma</button>
+        <button class="btn" id="evIcs" type="button">Agregar al calendario</button>
+      </div>
       <div class="actions">
         <button class="danger" id="evDelete" type="button">Eliminar</button>
         <span class="spacer"></span>
@@ -79,6 +95,22 @@
         <button class="primary" type="submit">Guardar</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- Alarma de un evento -->
+  <dialog id="alarmDlg">
+    <div class="dlg-body alarm">
+      <div class="bell" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+      </div>
+      <h2 id="alarmTitle"></h2>
+      <p id="alarmWhen" class="alarm-when"></p>
+      <div class="actions">
+        <button class="btn" id="alarmSnooze" type="button">Posponer 5 min</button>
+        <span class="spacer"></span>
+        <button class="primary" id="alarmDismiss" type="button">Descartar</button>
+      </div>
+    </div>
   </dialog>
 
   <!-- Diálogo de sincronización -->
