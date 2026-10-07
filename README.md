@@ -22,7 +22,10 @@ Al crear o editar un evento eliges el **Aviso**: sin aviso, al empezar, o 5, 10,
 
 Usa **Probar alarma** en el formulario del evento para oír y ver cómo suena, y para dar el permiso de notificaciones sin esperar.
 
-**Importante:** una página web no puede hacer sonar una alarma si la app está cerrada del todo, porque eso requiere un servidor de pago. Por eso cada evento tiene el botón **Agregar al calendario**: descarga un archivo `.ics` que, al abrirlo, mete el evento en el calendario del teléfono (Google Calendar, Samsung, Apple...) con el mismo aviso. Ese calendario sí suena con la app cerrada. Toca el archivo descargado y elige tu app de calendario.
+**Importante:** una página web no puede hacer sonar una alarma si la app está cerrada del todo, porque eso requiere un servidor de pago. Por eso el formulario del evento tiene dos botones para llevarlo al calendario del teléfono, que sí suena con la app cerrada:
+
+- **Google Calendar:** abre Google Calendar (o su app) con el evento ya rellenado: título, día y hora. Solo toca **Guardar** allá. Este enlace no puede fijar el aviso, así que el evento usa el aviso predeterminado de tu calendario; en la descripción queda anotado el aviso que elegiste.
+- **Archivo .ics:** descarga un archivo que, al abrirlo, mete el evento con su aviso en otros calendarios (Samsung, Apple, Outlook...). Algunos teléfonos no lo importan solos; si no pasa nada, usa el botón de Google Calendar.
 
 Detalles:
 - Cada dispositivo suena por su cuenta. Si tienes la app abierta en el celular y en el computador, sonará en los dos.

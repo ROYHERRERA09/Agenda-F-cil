@@ -356,7 +356,7 @@
   }
 
   function updateRemindHint() {
-    var t = 'La alarma suena mientras la app esté abierta. Para que suene con la app cerrada, usa «Agregar al calendario».';
+    var t = 'La alarma suena mientras la app esté abierta. Para que suene con la app cerrada, usa «Google Calendar» (o «.ics» si usas otro calendario).';
     try {
       if ('Notification' in window && Notification.permission === 'denied') {
         t += ' Las notificaciones están bloqueadas en este navegador, así que el aviso solo se verá dentro de la app.';
@@ -629,6 +629,23 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
 
+  // ── Google Calendar (enlace con el evento ya rellenado) ────────────
+  function remindLabel(r) {
+    if (r < 0) return '';
+    if (r === 0) return 'al empezar';
+    if (r === 60) return '1 hora antes';
+    return r + ' minutos antes';
+  }
+
+  function googleCalUrl(ev) {
+    var details = 'Creado en EasyNotes Planner.';
+    if (ev.remind >= 0) details += '\nAviso sugerido: ' + remindLabel(ev.remind) + '.';
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(ev.title) +
+      '&dates=' + icsLocal(ev.date, ev.startMin) + '/' + icsLocal(ev.date, ev.endMin) +
+      '&details=' + encodeURIComponent(details);
+  }
+
   // ── Diálogo de sincronización ──────────────────────────────────────
   function openSync() {
     $('syncStatus').textContent = 'Estado: ' + cloud.status;
@@ -740,6 +757,7 @@
       enqueueAlarm({ key: 'test|' + Date.now(), title: $('evTitle').value.trim() || 'Alarma de prueba', when: 'Así sonará tu aviso', test: true });
       showNextAlarm();
     });
+    $('evGcal').addEventListener('click', function () { window.open(googleCalUrl(formEvent()), '_blank', 'noopener'); });
     $('evIcs').addEventListener('click', function () { downloadIcs(formEvent()); });
     $('alarmSnooze').addEventListener('click', function () { closeAlarm(true); });
     $('alarmDismiss').addEventListener('click', function () { closeAlarm(false); });
