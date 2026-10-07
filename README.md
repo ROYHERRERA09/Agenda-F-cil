@@ -6,6 +6,7 @@ No necesitas instalar nada: son archivos HTML, CSS y JavaScript que GitHub Pages
 
 ## Cómo usarla
 
+- **Horario:** la cuadrícula va de 6 AM a 12 AM (medianoche) y las horas se muestran en formato AM/PM. Un evento que termina antes de las 6 AM no sale en la cuadrícula, pero sí en el panel del día.
 - **Semana:** desliza de lado para ver los 7 días. Toca un hueco de la cuadrícula para crear un evento a esa hora, o toca un evento para editarlo o eliminarlo.
 - **Botón +:** crea un evento en el día seleccionado.
 - **Día:** toca el encabezado de un día y abre la pestaña **Día** para ver sus eventos, tareas y notas.

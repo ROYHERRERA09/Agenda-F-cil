@@ -15,6 +15,8 @@
   var WD_LONG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   var MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
     'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var DAY_START = 6;  // la cuadrícula empieza a las 6 AM
+  var DAY_END = 24;   // y termina a las 12 de la noche
   var HOUR = 56;      // alto de una hora en píxeles (igual que --hour en el CSS)
   var GUTTER = 54;    // ancho de la columna de horas (igual que --gutter)
   var FIREBASE_VERSION = '10.12.2';
@@ -36,6 +38,15 @@
   function startOfWeek(d) { return addDays(d, -dayIndex(d)); }
   function sameDay(a, b) { return dateKey(a) === dateKey(b); }
   function fmtMin(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  // Hora en formato 12 h (6:30 AM, 12:00 PM, 12:00 AM)
+  function fmt12(m) {
+    var h = Math.floor(m / 60) % 24;
+    return ((h % 12) || 12) + ':' + pad(m % 60) + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+  function hourLabel(h) {
+    h = h % 24;
+    return ((h % 12) || 12) + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
   function toMin(s) {
     var p = String(s).split(':').map(Number);
     return (p[0] || 0) * 60 + (p[1] || 0);
@@ -243,8 +254,8 @@
     head += '</div>';
 
     var body = '<div class="wk-body"><div class="hours">';
-    for (var h = 1; h < 24; h++) {
-      body += '<span class="hlabel" style="top:' + (h * HOUR) + 'px">' + pad(h) + ':00</span>';
+    for (var h = DAY_START; h <= DAY_END; h++) {
+      body += '<span class="hlabel' + (h === DAY_START ? ' first' : '') + '" style="top:' + ((h - DAY_START) * HOUR) + 'px">' + hourLabel(h) + '</span>';
     }
     body += '</div>';
 
@@ -255,16 +266,21 @@
       placed.forEach(function (p) {
         var e = p.ev;
         var c = COLORS[e.colorIndex % COLORS.length] || COLORS[0];
-        var top = e.startMin / 60 * HOUR + 1;
-        var height = Math.max(20, (e.endMin - e.startMin) / 60 * HOUR - 2);
+        var gs = DAY_START * 60, ge = DAY_END * 60;
+        if (e.endMin <= gs) return; // antes de las 6 AM: solo se ve en el panel del día
+        var vs = Math.max(e.startMin, gs), ve = Math.min(e.endMin, ge);
+        var top = (vs - gs) / 60 * HOUR + 1;
+        var height = Math.max(20, (ve - vs) / 60 * HOUR - 2);
         body += '<div class="ev" data-id="' + esc(e.id) + '" style="top:' + top + 'px;height:' + height +
           'px;left:calc(' + (p.lane / p.lanes * 100) + '% + 2px);width:calc(' + (100 / p.lanes) +
           '% - 4px);--c:' + c + ';--t:' + (TEXT_COLORS[e.colorIndex % TEXT_COLORS.length] || c) + ';background:' + rgba(c, 0.18) + '"><b>' + esc(e.title) + '</b>' +
-          (height > 34 ? '<small>' + fmtMin(e.startMin) + ' – ' + fmtMin(e.endMin) + '</small>' : '') + '</div>';
+          (height > 34 ? '<small>' + fmt12(e.startMin) + ' – ' + fmt12(e.endMin) + '</small>' : '') + '</div>';
       });
       if (sameDay(d, today)) {
         var nowMin = today.getHours() * 60 + today.getMinutes();
-        body += '<div class="nowline" style="top:' + (nowMin / 60 * HOUR - 1) + 'px"></div>';
+        if (nowMin >= DAY_START * 60) {
+          body += '<div class="nowline" style="top:' + ((nowMin - DAY_START * 60) / 60 * HOUR - 1) + 'px"></div>';
+        }
       }
       body += '</div>';
     });
@@ -287,7 +303,7 @@
     evs.forEach(function (e) {
       h += '<button type="button" class="evrow" data-edit="' + esc(e.id) + '">' +
         '<i style="background:' + (COLORS[e.colorIndex % COLORS.length] || COLORS[0]) + '"></i>' +
-        '<span class="tm">' + fmtMin(e.startMin) + ' – ' + fmtMin(e.endMin) + '</span>' +
+        '<span class="tm">' + fmt12(e.startMin) + ' – ' + fmt12(e.endMin) + '</span>' +
         '<span class="tt">' + esc(e.title) + '</span></button>';
     });
 
@@ -444,7 +460,7 @@
   function describeWhen(e) {
     var m = Math.round((eventTs(e, e.startMin) - Date.now()) / 60000);
     var rel = m > 0 ? 'Empieza en ' + m + ' min' : (m === 0 ? 'Empieza ahora' : 'Empezó hace ' + (-m) + ' min');
-    return fmtMin(e.startMin) + ' – ' + fmtMin(e.endMin) + ' · ' + rel;
+    return fmt12(e.startMin) + ' – ' + fmt12(e.endMin) + ' · ' + rel;
   }
 
   function enqueueAlarm(a) { alarmQueue.push(a); }
@@ -685,7 +701,7 @@
   }
 
   // ── Pestañas (teléfono) ────────────────────────────────────────────
-  var lastScroll = { top: 7 * HOUR, left: 0 };
+  var lastScroll = { top: 0, left: 0 };
 
   function setTab(tab) {
     var sc = $('weekScroll');
@@ -794,7 +810,7 @@
       var col = e.target.closest('.daycol');
       if (col) {
         var rect = col.getBoundingClientRect();
-        var hour = Math.max(0, Math.min(23, Math.floor((e.clientY - rect.top) / HOUR)));
+        var hour = Math.max(DAY_START, Math.min(23, DAY_START + Math.floor((e.clientY - rect.top) / HOUR)));
         selected = parseKey(col.dataset.day);
         refreshAfterEdit();
         openEvent(null, col.dataset.day, hour * 60);
@@ -846,7 +862,7 @@
   loadLocal();
   bind();
   renderAll();
-  $('weekScroll').scrollTop = 7 * HOUR;
+  $('weekScroll').scrollTop = 0;
   scrollToSelectedDay();
   lastScroll = { top: $('weekScroll').scrollTop, left: $('weekScroll').scrollLeft };
   initCloud();
