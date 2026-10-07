@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EasyNotes Planner</title>
+  <meta name="description" content="Planner semanal con tareas, notas por día y eventos con colores.">
+  <meta name="theme-color" content="#D9622B">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="EasyNotes">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-tab="week">
+
+  <header class="top">
+    <div class="brand">Easy<span>Notes</span></div>
+    <div class="nav">
+      <button class="icon-btn" id="prevWeek" type="button" aria-label="Semana anterior">&#8249;</button>
+      <button class="btn" id="todayBtn" type="button">Hoy</button>
+      <button class="icon-btn" id="nextWeek" type="button" aria-label="Semana siguiente">&#8250;</button>
+      <span class="range" id="range"></span>
+    </div>
+    <div class="spacer"></div>
+    <button class="primary" id="newEventBtn" type="button">+ Nuevo evento</button>
+    <button class="sync" id="syncBtn" type="button" aria-label="Sincronización"></button>
+  </header>
+
+  <main class="layout">
+    <section class="card" id="weekCard" aria-label="Semana">
+      <div class="week-scroll" id="weekScroll">
+        <div class="week-inner" id="weekInner"></div>
+      </div>
+    </section>
+    <section class="card" id="dayPanel" aria-label="Día seleccionado"></section>
+  </main>
+
+  <button class="fab" id="fab" type="button" aria-label="Nuevo evento">+</button>
+
+  <nav class="tabs" aria-label="Vistas">
+    <button type="button" data-tab="week" class="on">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 9v12M15 9v12"/></svg>
+      <span>Semana</span>
+    </button>
+    <button type="button" data-tab="day">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="12" cy="15" r="2"/></svg>
+      <span>Día</span>
+    </button>
+  </nav>
+
+  <!-- Diálogo de evento -->
+  <dialog id="eventDlg">
+    <form id="evForm" autocomplete="off">
+      <h2 id="evHeading">Nuevo evento</h2>
+      <label class="field">Título
+        <input id="evTitle" type="text" maxlength="120" placeholder="Ej.: Reunión, gimnasio...">
+      </label>
+      <label class="field">Fecha
+        <input id="evDate" type="date" required>
+      </label>
+      <div class="row2">
+        <label class="field">Inicio
+          <input id="evStart" type="time" required>
+        </label>
+        <label class="field">Fin
+          <input id="evEnd" type="time" required>
+        </label>
+      </div>
+      <div class="field">Color
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="actions">
+        <button class="danger" id="evDelete" type="button">Eliminar</button>
+        <span class="spacer"></span>
+        <button class="btn" id="evCancel" type="button">Cancelar</button>
+        <button class="primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Diálogo de sincronización -->
+  <dialog id="syncDlg">
+    <div class="dlg-body">
+      <h2>Sincronización</h2>
+      <p id="syncStatus" class="sync-status"></p>
+      <div id="syncOn" hidden>
+        <p class="hint">Este es tu código de sincronización. Escríbelo igual en otro dispositivo para ver los mismos datos. No lo compartas con nadie.</p>
+        <label class="field">Código
+          <input id="syncCodeInput" type="text" spellcheck="false" autocapitalize="off" autocomplete="off">
+        </label>
+        <p class="error" id="syncError" hidden></p>
+      </div>
+      <p id="syncOff" class="hint" hidden>Firebase todavía no está configurado, así que tus datos se guardan solo en este dispositivo (en el navegador). Sigue la guía del README para activar la sincronización.</p>
+      <div class="actions">
+        <button class="btn" id="syncCopy" type="button" hidden>Copiar código</button>
+        <span class="spacer"></span>
+        <button class="btn" id="syncClose" type="button">Cerrar</button>
+        <button class="primary" id="syncUse" type="button" hidden>Usar este código</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

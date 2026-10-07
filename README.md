@@ -1,118 +1,65 @@
-# EasyNotes Planner (Android e iOS)
+# EasyNotes Planner (web)
 
-App de Flutter para teléfono con **planner semanal por horas**, **tareas con casillas**, **notas por día** y **eventos con colores**. Guarda todo en el teléfono y, si configuras Firebase, lo sincroniza con la nube. El mismo código sirve para Android e iOS.
+Página web con **planner semanal por horas**, **tareas con casillas**, **notas por día** y **eventos con colores**. Funciona en el navegador del celular y del computador, se puede instalar como app y guarda todo en tu dispositivo. Con Firebase (opcional) sincroniza entre dispositivos.
+
+No necesitas instalar nada: son archivos HTML, CSS y JavaScript que GitHub Pages publica gratis.
 
 ## Cómo usarla
 
-- **Semana:** desliza de lado para ver los 7 días. Toca un hueco para crear un evento a esa hora, o un evento para editarlo.
+- **Semana:** desliza de lado para ver los 7 días. Toca un hueco de la cuadrícula para crear un evento a esa hora, o toca un evento para editarlo o eliminarlo.
 - **Botón +:** crea un evento en el día seleccionado.
-- **Día:** toca el encabezado de un día en Semana y luego abre la pestaña Día para ver sus eventos, tareas y notas.
+- **Día:** toca el encabezado de un día y abre la pestaña **Día** para ver sus eventos, tareas y notas.
 - `Hoy`, `‹` y `›` mueven la semana.
-- La nube (arriba a la derecha) muestra el estado de sincronización y tu código.
+- **Nube** (arriba a la derecha): muestra el estado de sincronización y tu código.
 
-En una tableta o pantalla ancha se ve la semana completa y el panel del día lado a lado.
+En el celular verás dos pestañas abajo (Semana y Día). En un computador o tableta se ve la semana a la izquierda y el panel del día a la derecha.
 
-## Qué necesitas según la plataforma
+## 1. Publicarla con GitHub Pages
 
-| | Android | iOS |
-|---|---|---|
-| Computador | Windows, Mac o Linux | **Solo Mac** |
-| Herramienta | Android Studio (SDK de Android) | Xcode + CocoaPods |
-| Cuenta | Ninguna | Apple ID (gratis para probar en tu iPhone; Apple Developer de pago, unos 99 USD al año, para TestFlight o App Store) |
-
-Apple no permite compilar apps de iPhone desde Windows. Si solo tienes Windows, puedes usar un servicio de compilación en la nube (por ejemplo Codemagic) o pedir prestado un Mac. Android sí lo puedes hacer todo desde Windows.
-
-## 1. Preparar el proyecto
-
-Dentro de esta carpeta, genera las carpetas de las plataformas que uses:
+1. En tu repositorio `easynotes-planner` entra a **Settings → Pages**.
+2. En **Source** deja **Deploy from a branch**.
+3. En **Branch** elige **main** y la carpeta **/ (root)**, y pulsa **Save**.
+4. Espera 1 o 2 minutos. Tu página quedará en:
 
 ```
-flutter create --platforms=android,ios .
-flutter pub get
+https://royherrera09.github.io/easynotes-planner/
 ```
 
-`flutter create .` solo agrega `android/` e `ios/`; no toca tu código. Puedes borrar la carpeta `test/` que genera, porque apunta a una app de ejemplo que ya no existe. Si solo usas una plataforma, deja solo esa en `--platforms`.
+## 2. Instalarla en el celular
 
-### Ajustes de Android
+- **Android (Chrome):** abre la dirección, pulsa el menú ⋮ y elige **Instalar app** (o **Añadir a la pantalla de inicio**).
+- **iPhone (Safari):** abre la dirección, pulsa el botón de compartir y elige **Añadir a pantalla de inicio**.
 
-**a) Versión mínima.** En `android/app/build.gradle.kts` (o `build.gradle` en proyectos antiguos) cambia `minSdk` a 23:
+Queda con su ícono, se abre a pantalla completa y funciona aunque no haya internet.
 
-```
-minSdk = 23
-```
+## 3. Dónde se guardan los datos
 
-Si ves `minSdk = flutter.minSdkVersion`, reemplázalo por `minSdk = 23`.
+Por defecto, **en el navegador de cada dispositivo**. Eso significa que el celular y el computador no comparten datos, y que si borras los datos del navegador, se pierden. Para compartirlos y tener copia en la nube, activa Firebase.
 
-**b) Permiso de internet.** En `android/app/src/main/AndroidManifest.xml` agrega esta línea dentro de `<manifest>`, antes de `<application>`:
-
-```
-<uses-permission android:name="android.permission.INTERNET"/>
-```
-
-Sin esto la app funciona en modo debug pero no sincroniza cuando la instalas como versión final.
-
-Para correrla: conecta el teléfono con **depuración USB** activada (o abre un emulador) y ejecuta `flutter devices` y luego `flutter run`.
-
-### Ajustes de iOS (en el Mac)
-
-**a) Versión mínima.** Abre `ios/Podfile` y asegúrate de que la primera línea útil diga (quita el `#` si está comentada):
-
-```
-platform :ios, '13.0'
-```
-
-Firebase exige iOS 13 o superior. Si más adelante `pod install` pide una versión mayor, usa esa.
-
-**b) Firma.** Abre `ios/Runner.xcworkspace` con Xcode (el `.xcworkspace`, no el `.xcodeproj`). En **Runner → Signing & Capabilities**:
-
-- Elige tu **Team** (tu Apple ID personal sirve para probar).
-- Cambia el **Bundle Identifier** por uno único, por ejemplo `com.tunombre.easynotesplanner`.
-
-Usa el mismo identificador cuando ejecutes `flutterfire configure` en el paso 2.
-
-**c) Correrla.**
-
-- Simulador: `open -a Simulator` y luego `flutter run`.
-- iPhone real: conéctalo, desbloquéalo y confía en el Mac. Ejecuta `flutter run`. La primera vez, en el iPhone ve a **Ajustes → General → VPN y gestión de dispositivos** y confía en tu perfil de desarrollador. Con Apple ID gratis, la app caduca a los 7 días y hay que volver a instalarla.
-
-La primera compilación con Firebase en iOS tarda varios minutos porque descarga y compila los pods. Es normal. Si falla con errores de CocoaPods, prueba:
-
-```
-cd ios
-pod repo update
-pod install
-cd ..
-```
-
-Sin Firebase configurado, la app ya funciona y guarda los datos en el teléfono.
-
-## 2. Activar Firebase (sincronización)
+## 4. Activar Firebase (sincronización)
 
 1. Entra a https://console.firebase.google.com y crea un proyecto (por ejemplo `easynotes-planner`).
 2. En el proyecto: **Build → Firestore Database → Create database**. Elige una región cercana y empieza en modo de prueba.
-3. Instala las herramientas (una sola vez; necesitas Node.js):
+3. Registra la app web: en **Project settings** (el engranaje) → pestaña **General** → sección **Your apps** → ícono web `</>`. Ponle un nombre y registra la app (no marques Firebase Hosting).
+4. Firebase te muestra un bloque `firebaseConfig`. Cópialo.
+5. Abre el archivo `firebase-config.js` y reemplaza `window.FIREBASE_CONFIG = null;` por:
 
+```js
+window.FIREBASE_CONFIG = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
 ```
-npm install -g firebase-tools
-dart pub global activate flutterfire_cli
-firebase login
-```
 
-4. En la carpeta del proyecto:
-
-```
-flutterfire configure
-```
-
-   Elige tu proyecto y marca **android** y/o **ios**. Esto reemplaza `lib/firebase_options.dart` por el archivo real y agrega `android/app/google-services.json` y `ios/Runner/GoogleService-Info.plist`.
-
-5. Ejecuta de nuevo `flutter run`. La nube debe mostrarse en verde (**Sincronizado**).
-
-Si en Android el build se queja de `google-services`, revisa que el plugin esté aplicado: `flutterfire configure` normalmente lo agrega solo, pero en algunos proyectos hay que añadir `id("com.google.gms.google-services")` en `android/app/build.gradle.kts` y la versión del plugin en `android/settings.gradle.kts`. La guía oficial está en https://firebase.google.com/docs/flutter/setup.
+6. Guarda y sube el cambio a GitHub (ver sección 6). Cuando Pages se actualice, la nube de la esquina debe ponerse verde y decir **Sincronizado**.
 
 ### Reglas de Firestore
 
-El modo de prueba caduca a los 30 días. Para que siga funcionando, en **Firestore → Reglas** usa:
+El modo de prueba caduca a los 30 días. Para que siga funcionando, en **Firestore → Rules** usa:
 
 ```
 rules_version = '2';
@@ -127,32 +74,19 @@ service cloud.firestore {
 
 Ojo con esto: la app no usa cuentas de usuario. Cada persona se identifica solo con su **código de sincronización** (10 caracteres al azar), así que quien conozca el código puede leer y editar esos datos. Está bien para uso personal. Si algún día la compartes con otras personas, el siguiente paso es agregar Firebase Authentication y restringir las reglas por usuario.
 
-### Enlazar otro dispositivo (también entre Android e iPhone)
+Las claves de `firebaseConfig` no son secretas por sí solas, porque van en cualquier página web que use Firebase. La protección real está en las reglas de Firestore.
 
-Abre la nube, copia tu código y escríbelo en el otro dispositivo con **Usar este código**. Ese dispositivo debe estar vacío o ser el más antiguo, porque gana la versión editada más recientemente.
+### Enlazar otro dispositivo
 
-## 3. Instalarla como app normal
+Pulsa la nube, copia tu código y escríbelo en el otro dispositivo con **Usar este código**. Ese dispositivo debe estar vacío o ser el más antiguo, porque gana la versión editada más recientemente.
 
-**Android:** `flutter build apk --release` deja el archivo en `build/app/outputs/flutter-apk/app-release.apk`. Cópialo al teléfono y ábrelo (Android te pedirá permitir instalar apps de esa fuente), o usa `flutter install` con el teléfono conectado.
+## 5. Probarla en tu computador (opcional)
 
-**iOS:** `flutter build ipa` genera el paquete para subir a TestFlight o App Store, y necesita la cuenta de pago de Apple Developer. Para uso personal sin pagar, basta con `flutter run --release` en tu iPhone conectado (caduca a los 7 días).
+Abre `index.html` con doble clic y ya funciona, aunque el modo sin conexión y la instalación solo se activan desde la dirección de GitHub Pages.
 
-## 4. Subirla a GitHub
+## 6. Subir cambios a GitHub
 
-Este proyecto ya viene con Git inicializado y el primer commit hecho en la rama `main`. Solo falta conectarlo a tu repositorio:
-
-1. Crea un repositorio **vacío** en https://github.com/new con el nombre `easynotes-planner`. No marques README, .gitignore ni licencia.
-2. Abre una terminal dentro de la carpeta del proyecto. En Windows: clic derecho en un espacio vacío de la carpeta y elige **Git Bash Here** (o **Abrir en Terminal** en Windows 11).
-3. Escribe estos dos comandos, uno por uno:
-
-```
-git remote add origin https://github.com/royherrera09/easynotes-planner.git
-git push -u origin main
-```
-
-GitHub te pedirá iniciar sesión (o un token si tienes verificación en dos pasos).
-
-Para guardar cambios más adelante:
+Dentro de la carpeta del proyecto, en Git Bash:
 
 ```
 git add .
@@ -160,26 +94,28 @@ git commit -m "descripción del cambio"
 git push
 ```
 
-Notas:
-
-- El `.gitignore` ya excluye `build/`, `.dart_tool/`, `pubspec.lock` y los archivos de CocoaPods.
-- `lib/firebase_options.dart`, `android/app/google-services.json` y `ios/Runner/GoogleService-Info.plist` contienen claves de cliente de Firebase. No son secretas por sí solas (la seguridad real está en las reglas de Firestore), pero si el repositorio es público conviene tener las reglas bien puestas.
-- Nunca subas un archivo `.jks`, `key.properties` ni certificados o perfiles de Apple (`.p12`, `.mobileprovision`).
+La página se actualiza sola en 1 o 2 minutos. Si no ves el cambio, recarga con `Ctrl + F5` (en el celular, cierra y vuelve a abrir la app).
 
 ## Estructura
 
 ```
-lib/
-  main.dart              Arranque, tema, inicialización de Firebase
-  models.dart            Eventos, tareas y utilidades de fechas
-  controller.dart        Estado, guardado local y sincronización
-  planner_screen.dart    Pantalla: semana por horas, panel del día, diálogos
-  firebase_options.dart  Provisional hasta ejecutar flutterfire configure
+index.html            Estructura de la página
+styles.css            Estilos (celular y escritorio)
+app.js                Lógica: semana, tareas, notas, eventos, sincronización
+firebase-config.js    Aquí pegas la configuración de Firebase
+manifest.webmanifest  Datos para instalarla como app
+sw.js                 Permite abrirla sin conexión
+icons/                Íconos de la app
+.nojekyll             Le dice a GitHub Pages que sirva los archivos tal cual
 ```
+
+## Historial
+
+La primera versión de este proyecto fue una app de Flutter. Sigue guardada en el historial de Git (commit `6538504`), por si algún día quieres volver a ella.
 
 ## Ideas para después
 
 - Arrastrar eventos para moverlos o cambiar su duración.
-- Eventos repetidos (semanales) y recordatorios con notificación.
+- Eventos repetidos (semanales) y recordatorios.
 - Autenticación con Firebase para proteger los datos.
-- Integrar el editor de notas y PDF de NoteCanvas dentro de esta app.
+- Integrar el editor de notas y PDF de NoteCanvas.
