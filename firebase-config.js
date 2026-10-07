@@ -1,18 +1,18 @@
-// Configuración de Firebase (opcional).
+// Configuración de Firebase del proyecto "easynotes-planner".
 //
-// Mientras el valor sea null, la app guarda los datos solo en este dispositivo.
-// Para activar la sincronización entre dispositivos, pega aquí la configuración
-// de tu app web de Firebase (ver README.md, sección "Activar Firebase").
+// Estas claves son de cliente: van en cualquier página web que use Firebase y
+// no son secretas. La protección real de los datos está en las reglas de
+// Firestore (ver README.md).
 //
-// Ejemplo de cómo debe quedar:
-//
-// window.FIREBASE_CONFIG = {
-//   apiKey: "AIza...",
-//   authDomain: "tu-proyecto.firebaseapp.com",
-//   projectId: "tu-proyecto",
-//   storageBucket: "tu-proyecto.firebasestorage.app",
-//   messagingSenderId: "1234567890",
-//   appId: "1:1234567890:web:abcdef123456"
-// };
+// Si algún día quieres volver al modo solo local, cambia todo el bloque por:
+//   window.FIREBASE_CONFIG = null;
 
-window.FIREBASE_CONFIG = null;
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCp0HGE41A-RJiiLi8crRT6Gbw2MBZOpXU",
+  authDomain: "easynotes-planner.firebaseapp.com",
+  projectId: "easynotes-planner",
+  storageBucket: "easynotes-planner.firebasestorage.app",
+  messagingSenderId: "659592248353",
+  appId: "1:659592248353:web:98c331d6a6801e45097760",
+  measurementId: "G-RVQMX76JLR"
+};
