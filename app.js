@@ -7,8 +7,10 @@
   'use strict';
 
   // ── Constantes ─────────────────────────────────────────────────────
-  var COLORS = ['#D9622B', '#3B62D4', '#2E7D32', '#8E24AA', '#C62828', '#00838F'];
-  var COLOR_NAMES = ['Naranja', 'Azul', 'Verde', 'Morado', 'Rojo', 'Turquesa'];
+  var COLORS = ['#2F6FDE', '#0EA5E9', '#4F46E5', '#0F766E', '#1E3A8A', '#7C3AED'];
+  var COLOR_NAMES = ['Azul', 'Celeste', 'Índigo', 'Verde azulado', 'Marino', 'Violeta'];
+  // Versión más oscura de cada color, para que el texto del evento se lea bien
+  var TEXT_COLORS = ['#1F55B8', '#075985', '#3730A3', '#115E59', '#1E3A8A', '#5B21B6'];
   var WD_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   var WD_LONG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   var MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
@@ -253,7 +255,7 @@
         var height = Math.max(20, (e.endMin - e.startMin) / 60 * HOUR - 2);
         body += '<div class="ev" data-id="' + esc(e.id) + '" style="top:' + top + 'px;height:' + height +
           'px;left:calc(' + (p.lane / p.lanes * 100) + '% + 2px);width:calc(' + (100 / p.lanes) +
-          '% - 4px);--c:' + c + ';background:' + rgba(c, 0.18) + '"><b>' + esc(e.title) + '</b>' +
+          '% - 4px);--c:' + c + ';--t:' + (TEXT_COLORS[e.colorIndex % TEXT_COLORS.length] || c) + ';background:' + rgba(c, 0.18) + '"><b>' + esc(e.title) + '</b>' +
           (height > 34 ? '<small>' + fmtMin(e.startMin) + ' – ' + fmtMin(e.endMin) + '</small>' : '') + '</div>';
       });
       if (sameDay(d, today)) {

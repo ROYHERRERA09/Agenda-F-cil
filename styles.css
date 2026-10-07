@@ -1,11 +1,11 @@
 :root {
-  --accent: #D9622B;
-  --accent-d: #BF5524;
-  --paper: #F6F3EE;
+  --accent: #2F6FDE;
+  --accent-d: #1F55B8;
+  --paper: #EEF3FA;
   --card: #FFFFFF;
-  --ink: #1C1B18;
-  --muted: #8A857B;
-  --line: #E6E1D8;
+  --ink: #14213D;
+  --muted: #6F7F99;
+  --line: #DCE5F2;
   --ok: #2E7D32;
   --danger: #E53935;
   --hour: 56px;
@@ -85,7 +85,7 @@ input, textarea { font: inherit; color: inherit; }
   border-radius: 9px;
 }
 .sync:hover { background: var(--paper); }
-.sync .dot { width: 9px; height: 9px; border-radius: 50%; background: #B8B2A7; }
+.sync .dot { width: 9px; height: 9px; border-radius: 50%; background: #B3C0D6; }
 .sync.ok { color: var(--ok); }
 .sync.ok .dot { background: var(--ok); }
 
@@ -154,8 +154,8 @@ input, textarea { font: inherit; color: inherit; }
   border-left: 1px solid var(--line);
   background: transparent;
 }
-.dayhead:hover { background: rgba(217, 98, 43, .05); }
-.dayhead.sel { background: rgba(217, 98, 43, .09); }
+.dayhead:hover { background: rgba(47, 111, 222, .05); }
+.dayhead.sel { background: rgba(47, 111, 222, .09); }
 .dayhead .dn { font-size: 11px; font-weight: 600; color: var(--muted); }
 .dayhead.today .dn { color: var(--accent); }
 .dayhead .dnum {
@@ -178,7 +178,7 @@ input, textarea { font: inherit; color: inherit; }
   background-size: 100% var(--hour);
   cursor: pointer;
 }
-.daycol.sel { background-color: rgba(217, 98, 43, .04); }
+.daycol.sel { background-color: rgba(47, 111, 222, .04); }
 
 .ev {
   position: absolute;
@@ -186,7 +186,7 @@ input, textarea { font: inherit; color: inherit; }
   padding: 3px 6px;
   border-left: 3px solid var(--c);
   border-radius: 6px;
-  color: var(--c);
+  color: var(--t, var(--c));
   font-size: 11px;
   line-height: 1.25;
   cursor: pointer;
@@ -266,7 +266,7 @@ input, textarea { font: inherit; color: inherit; }
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #FFFBEA;
+  background: #F3F7FF;
   resize: vertical;
 }
 input:focus-visible, textarea:focus-visible, button:focus-visible {
@@ -282,9 +282,9 @@ dialog {
   border-radius: 14px;
   background: #fff;
   color: var(--ink);
-  box-shadow: 0 16px 48px rgba(28, 27, 24, .3);
+  box-shadow: 0 16px 48px rgba(20, 33, 61, .3);
 }
-dialog::backdrop { background: rgba(28, 27, 24, .45); }
+dialog::backdrop { background: rgba(20, 33, 61, .45); }
 dialog form, .dlg-body { padding: 20px; }
 dialog h2 { margin: 0 0 14px; font-size: 18px; }
 .field { display: block; margin-bottom: 12px; font-size: 12px; color: var(--muted); }
@@ -362,7 +362,7 @@ dialog h2 { margin: 0 0 14px; font-size: 18px; }
     color: #fff;
     font-size: 30px;
     line-height: 1;
-    box-shadow: 0 6px 16px rgba(217, 98, 43, .45);
+    box-shadow: 0 6px 16px rgba(47, 111, 222, .45);
   }
   .fab:active { background: var(--accent-d); }
 }
