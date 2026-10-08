@@ -11,6 +11,7 @@ No necesitas instalar nada: son archivos HTML, CSS y JavaScript que GitHub Pages
 - **Botón +:** crea un evento en el día seleccionado.
 - **Día:** toca el encabezado de un día y abre la pestaña **Día** para ver sus eventos, tareas y notas.
 - `Hoy`, `‹` y `›` mueven la semana.
+- **Tema:** el botón de la luna/sol (arriba a la derecha) cambia entre tema claro y oscuro. La primera vez usa el tema de tu teléfono o computador, y después recuerda tu elección en ese dispositivo.
 - **Nube** (arriba a la derecha): muestra el estado de sincronización y tu código.
 
 En el celular verás dos pestañas abajo (Semana y Día). En un computador o tableta se ve la semana a la izquierda y el panel del día a la derecha.

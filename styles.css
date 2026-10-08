@@ -11,7 +11,30 @@
   --hour: 56px;
   --gutter: 54px;
   --colw: 96px;
+  --surface: #FFFFFF;
+  --note: #F3F7FF;
+  color-scheme: light;
 }
+
+:root[data-theme="dark"] {
+  --accent: #4C86F0;
+  --accent-d: #3B72D9;
+  --paper: #0D1524;
+  --card: #162136;
+  --surface: #162136;
+  --note: #1B2940;
+  --ink: #E6EDF8;
+  --muted: #8EA0BD;
+  --line: #26354F;
+  --ok: #66BB6A;
+  --danger: #FF6B67;
+  color-scheme: dark;
+}
+:root[data-theme="dark"] .ev { color: var(--tl, var(--t, var(--c))); }
+:root[data-theme="dark"] .sync .dot { background: #4A5B78; }
+:root[data-theme="dark"] .sync.ok .dot { background: var(--ok); }
+:root[data-theme="dark"] dialog { box-shadow: 0 16px 48px rgba(0, 0, 0, .6); }
+:root[data-theme="dark"] .swatch.on { border-color: #fff; }
 
 * { box-sizing: border-box; }
 
@@ -36,7 +59,7 @@ input, textarea { font: inherit; color: inherit; }
 .btn, .primary, .danger, .icon-btn {
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   padding: 7px 14px;
   line-height: 1.2;
 }
@@ -64,7 +87,7 @@ input, textarea { font: inherit; color: inherit; }
   gap: 6px 14px;
   padding: 8px 16px;
   padding-top: calc(8px + env(safe-area-inset-top));
-  background: #fff;
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
 .brand { font-size: 20px; font-weight: 700; letter-spacing: -.2px; }
@@ -85,6 +108,20 @@ input, textarea { font: inherit; color: inherit; }
   border-radius: 9px;
 }
 .sync:hover { background: var(--paper); }
+
+.theme-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+}
+.theme-btn:hover { background: var(--paper); color: var(--ink); }
+.theme-btn svg { display: block; }
 .sync .dot { width: 9px; height: 9px; border-radius: 50%; background: #B3C0D6; }
 .sync.ok { color: var(--ok); }
 .sync.ok .dot { background: var(--ok); }
@@ -126,14 +163,14 @@ input, textarea { font: inherit; color: inherit; }
   position: sticky;
   top: 0;
   z-index: 5;
-  background: #fff;
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
 .gut, .hours {
   position: sticky;
   left: 0;
   z-index: 4;
-  background: #fff;
+  background: var(--surface);
 }
 .hours { height: calc(18 * var(--hour) + 14px); }
 .hlabel {
@@ -259,6 +296,7 @@ input, textarea { font: inherit; color: inherit; }
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
+  background: var(--surface);
 }
 
 #noteArea {
@@ -268,7 +306,7 @@ input, textarea { font: inherit; color: inherit; }
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #F3F7FF;
+  background: var(--note);
   resize: vertical;
 }
 input:focus-visible, textarea:focus-visible, button:focus-visible {
@@ -282,7 +320,7 @@ dialog {
   padding: 0;
   border: 0;
   border-radius: 14px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   box-shadow: 0 16px 48px rgba(20, 33, 61, .3);
 }
@@ -293,7 +331,7 @@ dialog h2 { margin: 0 0 14px; font-size: 18px; }
 .field input,
 .field select {
   display: block;
-  background: #fff;
+  background: var(--surface);
   width: 100%;
   margin-top: 4px;
   padding: 9px 10px;
@@ -334,7 +372,7 @@ dialog h2 { margin: 0 0 14px; font-size: 18px; }
   .tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: #fff;
+    background: var(--surface);
     border-top: 1px solid var(--line);
     padding-bottom: env(safe-area-inset-bottom);
   }

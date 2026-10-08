@@ -12,6 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="EasyNotes">
+  <script>(function(){try{var t=localStorage.getItem('easynotes.theme');if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-tab="week">
@@ -26,6 +27,7 @@
     </div>
     <div class="spacer"></div>
     <button class="primary" id="newEventBtn" type="button">+ Nuevo evento</button>
+    <button class="theme-btn" id="themeBtn" type="button"></button>
     <button class="sync" id="syncBtn" type="button" aria-label="Sincronización"></button>
   </header>
 

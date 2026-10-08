@@ -11,6 +11,8 @@
   var COLOR_NAMES = ['Azul', 'Celeste', 'Índigo', 'Verde azulado', 'Marino', 'Violeta'];
   // Versión más oscura de cada color, para que el texto del evento se lea bien
   var TEXT_COLORS = ['#1F55B8', '#075985', '#3730A3', '#115E59', '#1E3A8A', '#5B21B6'];
+  var TEXT_COLORS_DARK = ['#9DC0FF', '#7DD3FC', '#A5B4FC', '#5EEAD4', '#93B4F5', '#C4B5FD'];
+  var THEME_KEY = 'easynotes.theme';
   var WD_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   var WD_LONG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   var MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
@@ -273,7 +275,7 @@
         var height = Math.max(20, (ve - vs) / 60 * HOUR - 2);
         body += '<div class="ev" data-id="' + esc(e.id) + '" style="top:' + top + 'px;height:' + height +
           'px;left:calc(' + (p.lane / p.lanes * 100) + '% + 2px);width:calc(' + (100 / p.lanes) +
-          '% - 4px);--c:' + c + ';--t:' + (TEXT_COLORS[e.colorIndex % TEXT_COLORS.length] || c) + ';background:' + rgba(c, 0.18) + '"><b>' + esc(e.title) + '</b>' +
+          '% - 4px);--c:' + c + ';--t:' + (TEXT_COLORS[e.colorIndex % TEXT_COLORS.length] || c) + ';--tl:' + (TEXT_COLORS_DARK[e.colorIndex % TEXT_COLORS_DARK.length] || c) + ';background:' + rgba(c, 0.18) + '"><b>' + esc(e.title) + '</b>' +
           (height > 34 ? '<small>' + fmt12(e.startMin) + ' – ' + fmt12(e.endMin) + '</small>' : '') + '</div>';
       });
       if (sameDay(d, today)) {
@@ -369,6 +371,37 @@
     var sel = $('evRemind');
     sel.value = String(v);
     if (sel.value !== String(v)) sel.value = '-1';
+  }
+
+  // ── Tema claro / oscuro ────────────────────────────────────────────
+  var ICON_MOON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  var ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+
+  function systemDark() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; }
+  }
+
+  function currentTheme() {
+    var t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) { /* sin almacenamiento */ }
+    return t === 'dark' || t === 'light' ? t : (systemDark() ? 'dark' : 'light');
+  }
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#0D1524' : '#2F6FDE');
+    var b = $('themeBtn');
+    b.innerHTML = t === 'dark' ? ICON_SUN : ICON_MOON;
+    var label = t === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+    b.setAttribute('aria-label', label);
+    b.title = label;
+  }
+
+  function toggleTheme() {
+    var t = currentTheme() === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* sin almacenamiento */ }
+    applyTheme(t);
   }
 
   function updateRemindHint() {
@@ -775,6 +808,7 @@
     });
     $('evGcal').addEventListener('click', function () { window.open(googleCalUrl(formEvent()), '_blank', 'noopener'); });
     $('evIcs').addEventListener('click', function () { downloadIcs(formEvent()); });
+    $('themeBtn').addEventListener('click', toggleTheme);
     $('alarmSnooze').addEventListener('click', function () { closeAlarm(true); });
     $('alarmDismiss').addEventListener('click', function () { closeAlarm(false); });
     $('alarmDlg').addEventListener('close', function () { if (!$('alarmDlg').open) closeAlarm(false); });
@@ -859,6 +893,7 @@
   }
 
   // ── Inicio ─────────────────────────────────────────────────────────
+  applyTheme(currentTheme());
   loadLocal();
   bind();
   renderAll();

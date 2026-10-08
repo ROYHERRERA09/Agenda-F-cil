@@ -1,7 +1,7 @@
 // Service worker: permite abrir la app sin conexión.
 // Primero intenta la red (así siempre ves la última versión) y, si no hay
 // internet, usa la copia guardada.
-var CACHE = 'easynotes-v3';
+var CACHE = 'easynotes-v4';
 var ASSETS = [
   './',
   'index.html',
