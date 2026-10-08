@@ -1,6 +1,6 @@
 {
-  "name": "EasyNotes Planner",
-  "short_name": "EasyNotes",
+  "name": "Agenda Fácil",
+  "short_name": "Agenda Fácil",
   "description": "Planner semanal con tareas, notas por día y eventos con colores.",
   "lang": "es",
   "start_url": "./",

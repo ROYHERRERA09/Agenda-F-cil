@@ -1,4 +1,4 @@
-/* EasyNotes Planner
+/* Agenda Fácil
  * Planner semanal por horas, tareas, notas por día y eventos con colores.
  * Guarda en el navegador (localStorage) y, si configuras Firebase en
  * firebase-config.js, sincroniza con Firestore usando un código personal.
@@ -645,7 +645,7 @@
 
   function buildIcs(ev) {
     var lines = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//EasyNotes Planner//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Agenda Facil//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
       'BEGIN:VEVENT',
       'UID:' + ev.id + '@easynotes-planner',
       'DTSTAMP:' + utcStamp(),
@@ -687,7 +687,7 @@
   }
 
   function googleCalUrl(ev) {
-    var details = 'Creado en EasyNotes Planner.';
+    var details = 'Creado en Agenda Fácil.';
     if (ev.remind >= 0) details += '\nAviso sugerido: ' + remindLabel(ev.remind) + '.';
     return 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
       '&text=' + encodeURIComponent(ev.title) +

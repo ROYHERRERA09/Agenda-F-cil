@@ -1,4 +1,4 @@
-# EasyNotes Planner (web)
+# Agenda Fácil (web)
 
 Página web con **planner semanal por horas**, **tareas con casillas**, **notas por día** y **eventos con colores**. Funciona en el navegador del celular y del computador, se puede instalar como app y guarda todo en tu dispositivo. Con Firebase (opcional) sincroniza entre dispositivos.
 
