@@ -361,7 +361,19 @@ dialog h2 { margin: 0 0 14px; font-size: 18px; }
 
 /* ── Teléfono y pantallas medianas ─────────────────────────────── */
 @media (max-width: 899px) {
-  :root { --colw: 112px; }
+  /* Teléfono: los 7 días caben en el ancho de la pantalla, sin deslizar de lado */
+  :root { --gutter: 38px; --colw: 0px; }
+  .layout { padding-left: 6px; padding-right: 6px; }
+  .week-inner { min-width: 0; }
+  .hlabel { right: 3px; font-size: 9px; }
+  .dayhead { padding: 6px 0 3px; gap: 2px; }
+  .dayhead .dn { font-size: 10px; }
+  .dayhead .dnum { width: 26px; height: 26px; font-size: 13px; }
+  .dayhead .pend { font-size: 9px; white-space: nowrap; overflow: hidden; }
+  .ev { padding: 2px 3px; font-size: 10px; border-left-width: 2px; border-radius: 4px; }
+  .ev small { display: none; }
+  .ev { padding: 2px 2px; font-size: 9px; }
+  .ev b { word-break: normal; overflow-wrap: break-word; hyphens: auto; letter-spacing: -.1px; }
   #newEventBtn { display: none; }
   .nav { order: 5; flex-basis: 100%; }
   .layout { grid-template-columns: 1fr; padding: 10px 10px 0; }
